@@ -57,7 +57,7 @@ double calculateAverageRating(const BookDatabase<T> &books) {
 
 template <BookContainerLike T>
 auto sampleRandomBooks(const BookDatabase<T> &cont, size_t num) {
-    const auto &books = cont.getBooks();
+    const auto &books = cont.GetBooks();
 
     if (num > books.size()) {
         num = books.size();
@@ -86,12 +86,12 @@ auto sampleRandomBooks(const BookDatabase<T> &cont, size_t num) {
 
 template <BookContainerLike T, typename Comparator>
 auto getTopNBy(BookDatabase<T> &cont, size_t n, Comparator comp) {
-    std::nth_element(cont.begin(), cont.begin() + n, cont.end(), comp);
+    std::partial_sort(cont.rbegin(), cont.rbegin() + n, cont.rend(), comp);
 
     std::vector<std::reference_wrapper<const Book>> result;
     result.reserve(n);
-    std::transform(cont.begin(), cont.begin() + n, std::back_inserter(result),
-                   [](const Book &iBook) { return std::reference_wrapper<const Book>(iBook); });
+    std::copy(cont.rbegin(), cont.rbegin() + n, std::back_inserter(result));
+
     return result;
 }
 

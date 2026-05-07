@@ -77,8 +77,7 @@ template <>
 struct formatter<bookdb::Book, char> {
     template <typename FormatContext>
     auto format(const bookdb::Book &book, FormatContext &fc) const {
-        return std::format_to(fc.out(),
-                              "Book(: author: {}, title: {}, year: {}, genre: {}, rating: {}, read_count: {})",
+        return std::format_to(fc.out(), "Book(author: {}, title: {}, year: {}, genre: {}, rating: {}, read_count: {})",
                               book.author, book.title, book.year, book.genre, book.rating, book.read_count);
     }
 

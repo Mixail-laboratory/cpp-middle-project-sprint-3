@@ -45,6 +45,8 @@ public:
     const_iterator begin() const { return books_.begin(); }
     iterator end() { return books_.end(); }
     const_iterator end() const { return books_.end(); }
+    reverse_iterator rbegin() { return books_.rbegin(); }
+    reverse_iterator rend() { return books_.rend(); }
 
     constexpr size_type size() const { return books_.size(); }
     constexpr bool empty() const { return size() == 0; }
