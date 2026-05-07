@@ -10,25 +10,33 @@ namespace bookdb {
 struct TransparentStringLess {
     using is_transparent = void;
 
-    auto operator()(const bookdb::Book &iBook, const std::string &iStr) { return iBook.title < iStr; }
-    auto operator()(const std::string &iStr, const Book &iBook) { return iStr < iBook.title; }
-    auto operator()(const Book &iBook, std::string_view iStr) { return iBook.author < iStr; }
-    auto operator()(std::string_view iStr, const Book &iBook) { return iStr < iBook.author; }
-};
+    bool operator()(std::string_view lhs, std::string_view rhs) const { return lhs < rhs; }
 
-struct TransparentStringEqual {
-    using is_transparent = void;
+    bool operator()(const std::string &lhs, std::string_view rhs) const { return lhs < rhs; }
 
-    auto operator()(const Book &iBook, const std::string &iStr) { return iBook.title == iStr; }
-    auto operator()(const std::string &iStr, const Book &iBook) { return iStr == iBook.title; }
-    auto operator()(const Book &iBook, std::string_view iStr) { return iBook.author == iStr; }
-    auto operator()(std::string_view iStr, const Book &iBook) { return iStr == iBook.author; }
+    bool operator()(std::string_view lhs, const std::string &rhs) const { return lhs < rhs; }
+
+    bool operator()(const std::string &lhs, const std::string &rhs) const { return lhs < rhs; }
 };
 
 struct TransparentStringHash {
     using is_transparent = void;
 
-    auto operator()(const Book &iBook) { return std::hash<std::string>{}(iBook.title); }
+    size_t operator()(std::string_view str) const { return std::hash<std::string_view>{}(str); }
+
+    size_t operator()(const std::string &str) const { return std::hash<std::string>{}(str); }
+};
+
+struct TransparentStringEqual {
+    using is_transparent = void;
+
+    bool operator()(std::string_view lhs, std::string_view rhs) const { return lhs == rhs; }
+
+    bool operator()(const std::string &lhs, std::string_view rhs) const { return lhs == rhs; }
+
+    bool operator()(std::string_view lhs, const std::string &rhs) const { return lhs == rhs; }
+
+    bool operator()(const std::string &lhs, const std::string &rhs) const { return lhs == rhs; }
 };
 
 }  // namespace bookdb

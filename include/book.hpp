@@ -39,6 +39,8 @@ struct Book final {
 
     constexpr Book(std::string_view iGenre) : genre(GenreFromString(iGenre)) {};
     constexpr Book(Genre iGenre) : genre(iGenre) {};
+    Book(std::string_view iTitle, std::string_view iAuthor, int iYear, Genre iGenre, double iRating, int iReadCount)
+        : author(iAuthor), title(iTitle), year(iYear), genre(iGenre), rating(iRating), read_count(iReadCount) {}
 };
 }  // namespace bookdb
 
