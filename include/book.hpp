@@ -37,8 +37,14 @@ struct Book final {
     double rating;
     int read_count;
 
-    constexpr Book(std::string_view iGenre) : genre(GenreFromString(iGenre)) {};
-    constexpr Book(Genre iGenre) : genre(iGenre) {};
+    constexpr Book(std::string_view iTitle, std::string_view iAuthor, int iYear, Genre iGenre, double iRating,
+                   int iReadCount)
+        : author(iAuthor), title(iTitle), year(iYear), genre(iGenre), rating(iRating), read_count(iReadCount) {}
+
+    constexpr Book(std::string_view iTitle, std::string_view iAuthor, int iYear, std::string_view iGenre,
+                   double iRating, int iReadCount)
+        : author(iAuthor), title(iTitle), year(iYear), genre(GenreFromString(iGenre)), rating(iRating),
+          read_count(iReadCount) {}
 };
 }  // namespace bookdb
 
@@ -75,8 +81,7 @@ template <>
 struct formatter<bookdb::Book, char> {
     template <typename FormatContext>
     auto format(const bookdb::Book &book, FormatContext &fc) const {
-        return std::format_to(fc.out(),
-                              "Book(: author: {}, title: {}, year: {}, genre: {}, rating: {}, read_count: {})",
+        return std::format_to(fc.out(), "Book(author: {}, title: {}, year: {}, genre: {}, rating: {}, read_count: {})",
                               book.author, book.title, book.year, book.genre, book.rating, book.read_count);
     }
 
