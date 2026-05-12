@@ -17,7 +17,7 @@ namespace bookdb {
 template <BookContainerLike T, typename Comparator = TransparentStringLess>
 auto buildAuthorHistogramFlat(const BookDatabase<T> &cont, Comparator comp = {}) {
     const auto books = cont.GetBooks();
-    std::flat_map<std::string_view, size_t> histogram;
+    std::flat_map<std::string_view, size_t, Comparator> histogram;
     std::for_each(books.begin(), books.end(), [&](const Book &book) {
         auto [it, inserted] = histogram.try_emplace(book.author, 0);
         ++it->second;
@@ -50,8 +50,8 @@ double calculateAverageRating(const BookDatabase<T> &books) {
     if (books.empty()) {
         return 0;
     }
-    auto sum = std::accumulate(books.begin(), books.end(), 0.0,
-                               [](double acc, const Book &iBook) { return acc + iBook.rating; });
+    auto sum = std::transform_reduce(books.begin(), books.end(), 0.0, std::plus{},
+                                     [](const Book &iBook) { return iBook.rating; });
     return sum / books.size();
 };
 
@@ -59,33 +59,26 @@ template <BookContainerLike T>
 auto sampleRandomBooks(const BookDatabase<T> &cont, size_t num) {
     const auto &books = cont.GetBooks();
 
-    if (num > books.size()) {
-        num = books.size();
-    }
-
-    if (num == 0) {
+    if (num <= 0) {
         throw std::runtime_error("invalid size");
     }
-
-    std::vector<size_t> indices(books.size());
-    std::iota(indices.begin(), indices.end(), 0);
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    std::shuffle(indices.begin(), indices.end(), gen);
 
     std::vector<std::reference_wrapper<const Book>> result;
     result.reserve(num);
 
-    std::transform(indices.begin(), indices.begin() + num, std::back_inserter(result),
-                   [&books](size_t idx) { return std::reference_wrapper<const Book>(books[idx]); });
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::sample(books.begin(), books.end(), std::back_inserter(result), num, gen);
 
     return result;
 }
 
 template <BookContainerLike T, typename Comparator>
 auto getTopNBy(BookDatabase<T> &cont, size_t n, Comparator comp) {
+    if (n > cont.size()) {
+        throw std::out_of_range("out of cont");
+    }
     std::partial_sort(cont.rbegin(), cont.rbegin() + n, cont.rend(), comp);
 
     std::vector<std::reference_wrapper<const Book>> result;
@@ -96,3 +89,22 @@ auto getTopNBy(BookDatabase<T> &cont, size_t n, Comparator comp) {
 }
 
 }  // namespace bookdb
+
+namespace std {
+template <typename Key, typename Value, typename Compare, typename KeyContainer, typename ValueContainer>
+struct formatter<std::flat_map<Key, Value, Compare, KeyContainer, ValueContainer>> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const std::flat_map<Key, Value, Compare, KeyContainer, ValueContainer> &map, FormatContext &ctx) const {
+        auto out = ctx.out();
+        std::format_to(out, "Author Histogram:\n");
+
+        for (const auto &[key, value] : map) {
+            std::format_to(out, "  {}: {}\n", key, value);
+        }
+
+        return out;
+    }
+};
+}  // namespace std

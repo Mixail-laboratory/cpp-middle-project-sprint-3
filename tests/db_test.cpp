@@ -5,6 +5,9 @@
 #include "statsistics.hpp"
 #include <gtest/gtest.h>
 
+using namespace std::string_view_literals;
+using namespace std::literals::string_literals;
+
 namespace bookdb {
 class BookDatabaseTest : public ::testing::Test {
 protected:
@@ -68,9 +71,9 @@ TEST_F(BookDatabaseTest, GetBooks) {
 TEST_F(BookDatabaseTest, HeterogeneousLookup) {
     auto authors = db.GetAuthors();
 
-    EXPECT_TRUE(authors.contains(std::string_view("Yuval Noah Harari")));
+    EXPECT_TRUE(authors.contains("Yuval Noah Harari"sv));
 
-    EXPECT_FALSE(authors.contains(std::string("Unknown Author")));
+    EXPECT_FALSE(authors.contains("Unknown Author"s));
 }
 
 TEST_F(BookDatabaseTest, Iterators) {
@@ -232,7 +235,6 @@ TEST_F(StatisticsTest, GetTopNByRating) {
     for (const auto &book_ref : top) {
         ratings.push_back(book_ref.get().rating);
     }
-    std::sort(ratings.rbegin(), ratings.rend());
     EXPECT_NEAR(ratings[0], 4.7, 0.01);
 }
 
@@ -254,16 +256,6 @@ TEST_F(StatisticsTest, GetTopNByAuthor) {
 
 class BookTest : public ::testing::Test {};
 
-TEST_F(BookTest, BookConstructorFromGenre) {
-    Book book(Genre::Fiction);
-    EXPECT_EQ(book.genre, Genre::Fiction);
-}
-
-TEST_F(BookTest, BookConstructorFromString) {
-    Book book("Fiction");
-    EXPECT_EQ(book.genre, Genre::Fiction);
-}
-
 TEST_F(BookTest, BookConstructorFull) {
     Book book("Test Title", "Test Author", 2020, Genre::SciFi, 4.5, 100);
 
@@ -271,7 +263,7 @@ TEST_F(BookTest, BookConstructorFull) {
     EXPECT_EQ(book.author, "Test Author");
     EXPECT_EQ(book.year, 2020);
     EXPECT_EQ(book.genre, Genre::SciFi);
-    EXPECT_EQ(book.rating, 4.5);
+    EXPECT_DOUBLE_EQ(book.rating, 4.5);
     EXPECT_EQ(book.read_count, 100);
 }
 

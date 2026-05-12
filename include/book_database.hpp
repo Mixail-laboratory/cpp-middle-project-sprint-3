@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
@@ -34,7 +35,9 @@ public:
 
     BookDatabase() = default;
 
-    BookDatabase(std::initializer_list<Book> init) : books_(init) {}
+    BookDatabase(std::initializer_list<Book> init) {
+        std::for_each(init.begin(), init.end(), [&](const Book &iBook) { PushBack(iBook); });
+    }
 
     void Clear() {
         books_.clear();
@@ -52,19 +55,25 @@ public:
     constexpr bool empty() const { return size() == 0; }
 
     void PushBack(const Book &book) {
-        authors_.emplace(book.author);
-        books_.push_back(book);
+        auto [it, _] = authors_.emplace(book.author);
+        Book updatedBook = book;
+        updatedBook.author = *it;
+        books_.push_back(std::move(book));
     }
+
     void PushBack(Book &&book) {
-        authors_.emplace(book.author);
+        auto [it, _] = authors_.emplace(book.author);
+        book.author = *it;
         books_.push_back(std::move(book));
     };
 
     template <typename... Args>
         requires std::constructible_from<Book, Args...>
     void EmplaceBack(Args &&...args) {
-        books_.emplace_back(std::forward<Args>(args)...);
-        authors_.emplace(books_.back().author);
+        Book book(std::forward<Args>(args)...);
+        auto [it, _] = authors_.emplace(book.author);
+        book.author = *it;
+        books_.push_back(std::move(book));
     }
 
     std::span<const Book> GetBooks() const { return books_; };

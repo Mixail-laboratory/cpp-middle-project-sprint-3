@@ -2,20 +2,14 @@
 
 #include <concepts>
 #include <iterator>
+#include <utility>
 
 #include "book.hpp"
 
 namespace bookdb {
 
 template <typename T>
-concept BookContainerLike = requires(T &container) {
-    { container.begin() } -> std::forward_iterator;
-    { container.end() } -> std::forward_iterator;
-
-    { *container.begin() } -> std::convertible_to<const Book &>;
-
-    { container.size() } -> std::convertible_to<std::size_t>;
-};
+concept IsBook = std::same_as<T, Book>;
 
 template <typename I>
 concept BookIterator = requires(I it) {
@@ -32,8 +26,25 @@ concept BookIterator = requires(I it) {
 
 template <typename S, typename I>
 concept BookSentinel = requires(const S &sentinel, const I &it) {
+    requires std::sentinel_for<S, I>;
+    requires BookIterator<I>;
+
     { it == sentinel } -> std::convertible_to<bool>;
-    { it != sentinel } -> std::convertible_to<bool>;
+    { sentinel == it } -> std::convertible_to<bool>;
+};
+
+template <typename T>
+concept BookContainerLike = requires(T &container) {
+    { container.begin() } -> BookIterator;
+    { container.end() } -> BookSentinel<decltype(container.begin())>;
+
+    { *container.begin() } -> std::convertible_to<const Book &>;
+
+    { container.size() } -> std::convertible_to<std::size_t>;
+
+    { container.push_back(std::declval<const Book &>()) } -> std::same_as<void>;
+
+    { container.clear() } -> std::same_as<void>;
 };
 
 template <typename P>

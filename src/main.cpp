@@ -42,11 +42,11 @@ int main() {
     std::print("Books sorted by popularity: {}\n\n==================\n", db);
 
     auto histogram = buildAuthorHistogramFlat(db);
-    // std::print("Author histogram: {}", histogram);
+    std::print("Author histogram: {}", histogram);
 
     // Ratings
     auto genreRatings = calculateGenreRatings(db.begin(), db.end());
-    // std::print("\n\nAverage ratings by genres: {}\n", genreRatings);
+    std::print("\n\nAverage ratings by genres: {}\n", genreRatings);
 
     auto avrRating = calculateAverageRating(db);
     std::print("Average books rating in library: {}\n", avrRating);

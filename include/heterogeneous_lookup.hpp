@@ -17,6 +17,14 @@ struct TransparentStringLess {
     bool operator()(std::string_view lhs, const std::string &rhs) const { return lhs < rhs; }
 
     bool operator()(const std::string &lhs, const std::string &rhs) const { return lhs < rhs; }
+
+    bool operator()(const char *lhs, std::string_view rhs) const { return std::string_view(lhs) < rhs; }
+
+    bool operator()(std::string_view lhs, const char *rhs) const { return lhs < std::string_view(rhs); }
+
+    bool operator()(const char *lhs, const std::string &rhs) const { return std::string_view(lhs) < rhs; }
+
+    bool operator()(const std::string &lhs, const char *rhs) const { return lhs < std::string_view(rhs); }
 };
 
 struct TransparentStringHash {

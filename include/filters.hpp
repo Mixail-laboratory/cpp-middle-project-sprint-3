@@ -28,12 +28,12 @@ auto filterBooks(It first, Sent last, Pred pred) {
 
 template <BookPredicate... Preds>
 constexpr auto all_of(Preds... preds) {
-    return [preds...](const Book &iBook) { return (... && preds(iBook)); };
+    return [... ps = std::move(preds)](const Book &iBook) { return (... && ps(iBook)); };
 }
 
 template <BookPredicate... Preds>
 constexpr auto any_of(Preds... preds) {
-    return [preds...](const Book &iBook) { return (... || preds(iBook)); };
+    return [... ps = std::move(preds)](const Book &iBook) { return (... || ps(iBook)); };
 }
 
 }  // namespace bookdb
